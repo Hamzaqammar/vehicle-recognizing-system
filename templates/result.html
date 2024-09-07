@@ -1,0 +1,96 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Vehicle Number Plate Recognition</title>
+        <!-- Bootstrap CSS -->
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+            *{
+                margin: 0;
+                padding: 0;
+            }
+            body{
+                background-color: #b0d0ea8f;
+                font-family: monospace;
+            }
+            .img-fluid{
+                width: 100%;
+            }
+            .main_heding{
+                text-align: center;
+                margin-bottom: 30px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1 class="mt-4 main_heding">Design of Smart Vechile recognition system for comprehensive information</h1>
+            <div class="row">
+                <div class="col-md-8">
+                    <img src="{% static 'images.jpg' %}" class="img-fluid"/>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Result</h5>
+                            <div id="result"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Bootstrap JS and jQuery (for some components) -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script>
+       
+        const captureButton = document.getElementById('capture');
+        const resultDiv = document.getElementById('result');
+
+       
+
+            
+    // Function to update the result table
+    function updateResultTable(carNumber, ownerName, otherDetails) {
+            // Create the table element
+            const table = document.createElement('table');
+            table.classList.add('table');
+
+            // Create table body
+            const tbody = document.createElement('tbody');
+
+            // Add rows for car number, owner name, and other details
+            const rows = [
+                { label: 'Car Number', value: carNumber },
+                { label: 'Owner Name', value: ownerName },
+                { label: 'Other Details', value: otherDetails }
+            ];
+
+            // Loop through the rows array and create table rows
+            rows.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.label}</td>
+                    <td>${row.value}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Append tbody to the table
+            table.appendChild(tbody);
+
+            // Clear previous content in the result div and append the table
+            resultDiv.innerHTML = '';
+            resultDiv.appendChild(table);
+        }
+
+
+        // Call this function with appropriate data to update the result table
+        updateResultTable('AFR420', 'John Doe', 'Color: Blue, Model: XYZ');
+        </script>
+    </body>
+</html>
