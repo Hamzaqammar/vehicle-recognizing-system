@@ -20,8 +20,10 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('video_feed', views.video_feed, name='video_feed'),
-    path('', views.index, name='index'),
-    path('result/', views.result, name='result'),
-    path('unauth/', views.unauth, name='unauth'),
+    # path('video_feed', views.video_feed, name='video_feed'),
+    # path('', views.index, name='index'),
+    # path('result/', views.result, name='result'),
+    # path('unauth/', views.unauth, name='unauth'),
+    path('new/', views.new, name='newindex'),
+    path('video_feed/', views.video_feed, name='video_feed'),
 ]
