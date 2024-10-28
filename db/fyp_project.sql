@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 07, 2024 at 02:50 PM
+-- Generation Time: Oct 28, 2024 at 08:01 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -85,7 +85,15 @@ INSERT INTO `auth_permission` (`id`, `name`, `content_type_id`, `codename`) VALU
 (21, 'Can add session', 6, 'add_session'),
 (22, 'Can change session', 6, 'change_session'),
 (23, 'Can delete session', 6, 'delete_session'),
-(24, 'Can view session', 6, 'view_session');
+(24, 'Can view session', 6, 'view_session'),
+(25, 'Can add vehicle owner', 7, 'add_vehicleowner'),
+(26, 'Can change vehicle owner', 7, 'change_vehicleowner'),
+(27, 'Can delete vehicle owner', 7, 'delete_vehicleowner'),
+(28, 'Can view vehicle owner', 7, 'view_vehicleowner'),
+(29, 'Can add vehicle', 7, 'add_vehicle'),
+(30, 'Can change vehicle', 7, 'change_vehicle'),
+(31, 'Can delete vehicle', 7, 'delete_vehicle'),
+(32, 'Can view vehicle', 7, 'view_vehicle');
 
 -- --------------------------------------------------------
 
@@ -177,7 +185,8 @@ INSERT INTO `django_content_type` (`id`, `app_label`, `model`) VALUES
 (2, 'auth', 'permission'),
 (4, 'auth', 'user'),
 (5, 'contenttypes', 'contenttype'),
-(6, 'sessions', 'session');
+(6, 'sessions', 'session'),
+(7, 'vehicle', 'vehicle');
 
 -- --------------------------------------------------------
 
@@ -214,7 +223,10 @@ INSERT INTO `django_migrations` (`id`, `app`, `name`, `applied`) VALUES
 (15, 'auth', '0010_alter_group_name_max_length', '2024-09-07 12:43:50.454662'),
 (16, 'auth', '0011_update_proxy_permissions', '2024-09-07 12:43:50.475969'),
 (17, 'auth', '0012_alter_user_first_name_max_length', '2024-09-07 12:43:50.509367'),
-(18, 'sessions', '0001_initial', '2024-09-07 12:43:50.620423');
+(18, 'sessions', '0001_initial', '2024-09-07 12:43:50.620423'),
+(19, 'vehicle', '0001_initial', '2024-10-24 19:09:50.108665'),
+(20, 'vehicle', '0002_rename_vehicleowner_vehicle_and_more', '2024-10-26 13:37:50.335541'),
+(21, 'vehicle', '0003_vehicle_owner_age', '2024-10-27 08:59:58.683595');
 
 -- --------------------------------------------------------
 
@@ -234,6 +246,27 @@ CREATE TABLE `django_session` (
 
 INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALUES
 ('hyqa9y6mzri4zgo7goee1ic8whwmkhp0', '.eJxVjDsOwjAQRO_iGlnGa_lDSc8ZrF3vBgeQI8VJhbg7iZQCutG8N_NWGdel5rXLnEdWF3VWp9-OsDyl7YAf2O6TLlNb5pH0ruiDdn2bWF7Xw_07qNjrtnZokGIhk7zFyGEY0FobShJgkwS35MEXBhOjIwISC8lZCILsPXr1-QL2pDgx:1smurM:6Uk1EA1iDRWxikD0FVvuG84pYhqv6aUOuOGEn2F2YrA', '2024-09-21 12:48:12.492284');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `vehicle_vehicle`
+--
+
+CREATE TABLE `vehicle_vehicle` (
+  `id` bigint(20) NOT NULL,
+  `plate_num` varchar(15) NOT NULL,
+  `owner_name` varchar(100) NOT NULL,
+  `owner_age` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `vehicle_vehicle`
+--
+
+INSERT INTO `vehicle_vehicle` (`id`, `plate_num`, `owner_name`, `owner_age`) VALUES
+(1, 'AHE 493', 'hamza', '20'),
+(2, 'AHE:493', 'hamza', '20');
 
 --
 -- Indexes for dumped tables
@@ -313,6 +346,13 @@ ALTER TABLE `django_session`
   ADD KEY `django_session_expire_date_a5c62663` (`expire_date`);
 
 --
+-- Indexes for table `vehicle_vehicle`
+--
+ALTER TABLE `vehicle_vehicle`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `plate_number` (`plate_num`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -332,7 +372,7 @@ ALTER TABLE `auth_group_permissions`
 -- AUTO_INCREMENT for table `auth_permission`
 --
 ALTER TABLE `auth_permission`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `auth_user`
@@ -362,13 +402,19 @@ ALTER TABLE `django_admin_log`
 -- AUTO_INCREMENT for table `django_content_type`
 --
 ALTER TABLE `django_content_type`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `django_migrations`
 --
 ALTER TABLE `django_migrations`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+
+--
+-- AUTO_INCREMENT for table `vehicle_vehicle`
+--
+ALTER TABLE `vehicle_vehicle`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Constraints for dumped tables

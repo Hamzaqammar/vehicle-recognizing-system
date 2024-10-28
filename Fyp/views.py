@@ -53,12 +53,12 @@
 
 # def unauth(request):
 #     return render(request,'unauth.html')
-
 import cv2
 from django.shortcuts import render
 import easyocr
 from django.http import StreamingHttpResponse
 from django.views.decorators import gzip
+from vehicle.models import vehicle
 
 # Initialize the EasyOCR reader (supports multiple languages)
 reader = easyocr.Reader(['en'])
@@ -78,22 +78,40 @@ def generate_video():
             # OCR processing to detect text (number plate)
             result = reader.readtext(gray_frame)
 
-            # Check if any text detected
+            # Initialize owner_name with default message
+            owner_name = "No match found"
+            
             if result:
-                print("Detected Number Plate:", result[0][1])  # Printing to console
+                detected_plate = result[0][1]  # Detected plate number
+                print("Detected Number Plate:", detected_plate)  # Printing to console
+
+                # Query the database for a matching number plate
+                try:
+                    owner = vehicle.objects.get(plate_num=detected_plate)
+                    owner_name = owner.owner_name
+                    owner_age = owner.owner_age
+                    print("Owner Name:", owner_name)
+                    print("Owner age:", owner_age)
+                except vehicle.DoesNotExist:
+                    print("No matching vehicle found for plate:", detected_plate)
+                    
 
             # Encode frame for streaming
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
 
+            # Yield the frame for streaming and update owner name in frontend
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+            # Update owner name on the client side
+            yield (b'<script>'
+                   b'document.getElementById("result").innerHTML = "' + owner_name.encode() + b'";'
+                   b'</script>\r\n')
 
 @gzip.gzip_page
 def video_feed(request):
     return StreamingHttpResponse(generate_video(), content_type='multipart/x-mixed-replace; boundary=frame')
 
-
-
 def new(request):
-    return render(request,'newindex.html')
+    return render(request, 'newindex.html')
