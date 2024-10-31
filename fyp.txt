@@ -4,37 +4,56 @@ import easyocr
 from django.http import StreamingHttpResponse
 from django.views.decorators import gzip
 from vehicle.models import vehicle
-from django.http import JsonResponse
 
 # Initialize the EasyOCR reader (supports multiple languages)
 reader = easyocr.Reader(['en'])
 
 # Video capture generator
 def generate_video():
+    # Open video capture from default camera
     cap = cv2.VideoCapture(0)
+
     while True:
         ret, frame = cap.read()
+
         if ret:
+            # Convert frame to grayscale for processing
             gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+            # OCR processing to detect text (number plate)
             result = reader.readtext(gray_frame)
-            generate_video.last_detected_name = "No match found"  # Default message
-            generate_video.last_detected_age = ""
+
+            # Initialize owner_name with default message
+            owner_name = "No match found"
+            
             if result:
-                detected_plate = result[0][1]
+                detected_plate = result[0][1]  # Detected plate number
                 print("Detected Number Plate:", detected_plate)  # Printing to console
+
+                # Query the database for a matching number plate
                 try:
                     owner = vehicle.objects.get(plate_num=detected_plate)
-                    generate_video.last_detected_name = owner.owner_name
-                    generate_video.last_detected_age = owner.owner_age
-                    
-                    
+                    owner_name = owner.owner_name
+                    owner_age = owner.owner_age
+                    print("Owner Name:", owner_name)
+                    print("Owner age:", owner_age)
                 except vehicle.DoesNotExist:
-                    pass
+                    print("No matching vehicle found for plate:", detected_plate)
+                    
+
+            # Encode frame for streaming
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
+
+            # Yield the frame for streaming and update owner name in frontend
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
+            # Update owner name on the client side
+            yield (b'<script>'
+                   b'alert("hello");'
+                   b'document.getElementById("result").innerHTML = "' + owner_name.encode() + b'";'
+                   b'</script>\r\n')
 
 @gzip.gzip_page
 def video_feed(request):
@@ -42,10 +61,3 @@ def video_feed(request):
 
 def new(request):
     return render(request, 'newindex.html')
-
-def get_owner_info(request):
-    owner_info = {
-        'owner_name': generate_video.last_detected_name,
-        'owner_age': generate_video.last_detected_age
-    }
-    return JsonResponse(owner_info)

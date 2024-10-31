@@ -47,6 +47,21 @@
                 </div>
             </div>
         </div>
+
+        <script>
+            function fetchOwnerInfo() {
+                fetch('/get_owner_info/')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById("result").innerHTML = data.owner_name + ", Age: " + data.owner_age;
+                    })
+                    .catch(error => console.error('Error fetching owner info:', error));
+            }
+            
+            // Poll every 3 seconds
+            setInterval(fetchOwnerInfo, 3000);
+            </script>
+            
         <!-- Bootstrap JS and jQuery (for some components) -->
         <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>

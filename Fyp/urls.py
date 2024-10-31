@@ -26,4 +26,5 @@ urlpatterns = [
     # path('unauth/', views.unauth, name='unauth'),
     path('new/', views.new, name='newindex'),
     path('video_feed/', views.video_feed, name='video_feed'),
+    path('get_owner_info/', views.get_owner_info, name='get_owner_info'),
 ]
