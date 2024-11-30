@@ -7,35 +7,51 @@
         <!-- Bootstrap CSS -->
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
         <style>
-            *{
-                margin: 0;
-                padding: 0;
-            }
-            body{
-                background-color: #b0d0ea8f;
-                font-family: monospace;
-            }
-            .img-fluid{
-                width: 100%;
-            }
-            .main_heding{
-                text-align: center;
-                margin-bottom: 30px;
-            }
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        body{
+            background-color: #b0d0ea8f;
+            font-family: monospace;
+        }
+        .img-fluid{
+            width: 100%;
+        }
+        .main_heading{
+            text-align: center;
+            margin-bottom: 30px;
+        }
         </style>
     </head>
     <body>
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">Smart Vehicle Recognition</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    
+                    <!-- Add Admin Login link -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/login/">Admin Login</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
         <div class="container">
-            <h1 class="mt-4 main_heading">Design of Smart new Vehicle Recognition System for Comprehensive Information</h1>
+            <h1 class="mt-4 main_heading">Design of Smart Vehicle Recognition System for Comprehensive Information</h1>
             <div class="row">
                 <div class="col-md-8">
                     <img
-                    id="video"
-                    class="img-fluid"
-                    src="/video_feed/"
-                    alt="Video feed"
-                >
-                
+                        id="video"
+                        class="img-fluid"
+                        src="/video_feed/"
+                        alt="Video feed"
+                    >
                 </div>
                 <div class="col-md-4">
                     <div class="card">
@@ -47,25 +63,39 @@
                 </div>
             </div>
         </div>
-
+        
         <script>
             function fetchOwnerInfo() {
                 fetch('/get_owner_info/')
                     .then(response => response.json())
                     .then(data => {
-                        document.getElementById("result").innerHTML = data.owner_name + ", Age: " + data.owner_age;
+                        const resultDiv = document.getElementById("result");
+                        if (data.owner_name === "No match found") {
+                            resultDiv.innerHTML = "No match found!";
+                        } else {
+                            resultDiv.innerHTML = `
+                                <strong>Owner Name:</strong> ${data.owner_name} <br>
+                                <strong>Age:</strong> ${data.owner_age} <br>
+                                <strong>CNIC:</strong> ${data.owner_cnic} <br>
+                                <strong>Department:</strong> ${data.owner_depart} <br>
+                                <strong>Phone:</strong> ${data.owner_phone} <br>
+                                <strong>Address:</strong> ${data.owner_address} <br>
+                                <strong>Gender:</strong> ${data.owner_gender}
+                                <strong>Vehicle Make:</strong> ${data.vehicle_Make}
+                                <strong>Vehicle Model:</strong> ${data.vehicle_Model}
+                            `;
+                        }
                     })
                     .catch(error => console.error('Error fetching owner info:', error));
             }
-            
+
             // Poll every 3 seconds
             setInterval(fetchOwnerInfo, 3000);
-            </script>
-            
+        </script>
+
         <!-- Bootstrap JS and jQuery (for some components) -->
         <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-      
     </body>
 </html>

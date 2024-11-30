@@ -18,6 +18,10 @@ from django.contrib import admin
 from django.urls import path
 from . import views
 
+admin.site.site_header = "Smart Vehicle Admin"
+admin.site.site_title = "Smart Vehicle Portal"
+admin.site.index_title = "Welcome to Design of Smart Vehicle Recognition System for Comprehensive Information"
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('video_feed', views.video_feed, name='video_feed'),
