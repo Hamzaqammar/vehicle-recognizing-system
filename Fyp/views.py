@@ -1,3 +1,4 @@
+import re  # For regular expressions
 import cv2
 from django.shortcuts import render
 import easyocr
@@ -5,8 +6,27 @@ from django.http import StreamingHttpResponse, JsonResponse
 from django.views.decorators import gzip
 from vehicle.models import vehicle
 
-# Initialize the EasyOCR reader (supports multiple languages)
+# Initialize the EasyOCR reader
 reader = easyocr.Reader(['en'], gpu=False)
+
+# List of region keywords to ignore
+ignored_regions = ["Sindh","Sind", "Punjab", "ICT", "Islamabad"]
+
+# Function to clean and validate detected license plates
+def clean_plate_text(detected_text):
+    # Remove unwanted characters
+    cleaned_text = re.sub(r"[^\w\-]", "", detected_text)  # Keep alphanumeric and hyphens only
+    cleaned_text = cleaned_text.upper()  # Normalize to uppercase
+
+    # Remove ignored regions
+    for region in ignored_regions:
+        cleaned_text = cleaned_text.replace(region.upper(), "")
+
+    # Validate against a basic license plate format (e.g., ABC-123, KED5641)
+    match = re.match(r"^[A-Z]{2,3}-?\d{3,4}$", cleaned_text)
+    if match:
+        return match.group()  # Return the valid plate
+    return None  # Invalid plate
 
 # Video capture generator
 def generate_video():
@@ -29,40 +49,43 @@ def generate_video():
             generate_video.last_detected_model = ""
 
             if result:
-                detected_plate = result[0][1]
-                print("Detected Number Plate:", detected_plate)  # Printing to console
+                # Combine detected text into one string
+                detected_texts = [item[1] for item in result]
+                detected_plate_raw = " ".join(detected_texts)
+                print("Raw Detected Plate:", detected_plate_raw)
 
-                # Get the bounding box of the detected plate
-                # EasyOCR returns the coordinates as a list of points
-                points = result[0][0]  # This is a list of 4 points defining the bounding box
+                # Clean and validate the detected plate
+                detected_plate = clean_plate_text(detected_plate_raw)
+                print("Cleaned Detected Plate:", detected_plate)
 
-                # Convert points to tuples with integer coordinates
-                top_left = tuple(map(int, points[0]))
-                bottom_right = tuple(map(int, points[2]))
+                if detected_plate:
+                    try:
+                        # Query the vehicle database with the cleaned plate
+                        owner = vehicle.objects.get(plate_num=detected_plate)
+                        # Update details
+                        generate_video.last_detected_name = owner.owner_name
+                        generate_video.last_detected_age = owner.owner_age
+                        generate_video.last_detected_gender = owner.owner_gender
+                        generate_video.last_detected_cnic = owner.owner_cnic
+                        generate_video.last_detected_depart = owner.owner_depart
+                        generate_video.last_detected_phone = owner.owner_phone
+                        generate_video.last_detected_address = owner.owner_address
+                        generate_video.last_detected_make = owner.vehicle_Make
+                        generate_video.last_detected_model = owner.vehicle_Model
+                    except vehicle.DoesNotExist:
+                        pass  # No match in the database
 
-                # Draw a green rectangle around the detected number plate
-                cv2.rectangle(frame, top_left, bottom_right, (0, 255, 0), 2)  # Green color and thickness of 2
-
-                try:
-                    owner = vehicle.objects.get(plate_num=detected_plate)
-                    # Update details
-                    generate_video.last_detected_name = owner.owner_name
-                    generate_video.last_detected_age = owner.owner_age
-                    generate_video.last_detected_gender = owner.owner_gender
-                    generate_video.last_detected_cnic = owner.owner_cnic
-                    generate_video.last_detected_depart = owner.owner_depart
-                    generate_video.last_detected_phone = owner.owner_phone
-                    generate_video.last_detected_address = owner.owner_address
-                    generate_video.last_detected_make = owner.vehicle_Make
-                    generate_video.last_detected_model = owner.vehicle_Model
-                except vehicle.DoesNotExist:
-                    pass  # If no vehicle is found for that number plate, the default values remain
+                # Draw a rectangle around the detected number plate
+                if len(result) > 0:
+                    points = result[0][0]  # Bounding box of the first detected text
+                    top_left = tuple(map(int, points[0]))
+                    bottom_right = tuple(map(int, points[2]))
+                    cv2.rectangle(frame, top_left, bottom_right, (0, 255, 0), 2)  # Green rectangle
 
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-
 
 
 @gzip.gzip_page
@@ -88,7 +111,6 @@ def get_owner_info(request):
         'vehicle_Model': generate_video.last_detected_model
     }
 
-    # If no match found, show the message
     if generate_video.last_detected_name == "No match found":
         owner_info = {
             'owner_name': "No match found",
